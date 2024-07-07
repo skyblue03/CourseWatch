@@ -1,0 +1,19 @@
+watches:
+  - id: "example_flinders_watch"
+    label: "Example: Replace with your course stream"
+    url: "https://example.com"   # replace with the public Flinders page URL
+    enabled: true
+
+    extract:
+      # MVP extraction: finds a number near the keyword in the page text
+      type: "keyword_number"
+      keyword: "Availability no"
+
+    condition:
+      op: ">"
+      value: 0
+
+    # modes:
+    # - once: notify once, then auto-disable this watch (no repeats)
+    # - on_open: notify every time it transitions from not available -> available
+    mode: "once"
