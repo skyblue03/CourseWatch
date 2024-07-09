@@ -2,12 +2,10 @@ name: CourseWatch check
 
 on:
   schedule:
-    # GitHub cron is UTC. Every 15 minutes:
     - cron: "*/15 * * * *"
   workflow_dispatch: {}
 
 permissions:
-  contents: write
   issues: write
 
 jobs:
@@ -27,20 +25,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Restore cached state.json 
+      - name: Restore state cache
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: coursewatch-state
+          restore-keys: coursewatch-state
+
       - name: Run watcher
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python src/main.py
 
-      - name: Commit updated state/config
-        run: |
-          if git diff --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git config user.name "coursewatch-bot"
-          git config user.email "coursewatch-bot@users.noreply.github.com"
-          git add state.json watchlist.yml
-          git commit -m "Update state / auto-pause triggered watches"
-          git push
+      # Save updated state.json back into cache
+      - name: Save state cache
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: coursewatch-state
